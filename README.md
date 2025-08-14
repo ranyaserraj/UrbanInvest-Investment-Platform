@@ -128,4 +128,4 @@ mysql -u root -p projet3 < sql/UrbanInvest.sql
 **UrbanInvest** - Investissements urbains professionnels
 👩‍💻 Auteur
 Ranya SERRAJ ANDALOUSSI 
-📧 ranyaserraj18@gmail.com | 🔗 LinkedIn
+📧 ranyaserraj18@gmail.com | 🔗 [LinkedIn](https://www.linkedin.com/in/ranya-serraj/)
