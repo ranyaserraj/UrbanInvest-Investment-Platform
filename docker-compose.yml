@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # Base de données MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: urbaninvest-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: urbaninvest
+      MYSQL_USER: urbaninvest
+      MYSQL_PASSWORD: urbaninvest123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    networks:
+      - urbaninvest-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Application UrbanInvest
+  urbaninvest-app:
+    build: .
+    container_name: urbaninvest-app
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=urbaninvest
+      - DB_USER=urbaninvest
+      - DB_PASSWORD=urbaninvest123
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - urbaninvest-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Jenkins (si pas déjà en cours d'exécution)
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: urbaninvest-jenkins
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    environment:
+      - JENKINS_OPTS=--httpPort=8080
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+    networks:
+      - urbaninvest-network
+    user: root
+    privileged: true
+
+  # SonarQube
+  sonarqube:
+    image: sonarqube:community
+    container_name: urbaninvest-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - urbaninvest-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mysql_data:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
+
+networks:
+  urbaninvest-network:
+    driver: bridge
