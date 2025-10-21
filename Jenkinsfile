@@ -96,11 +96,11 @@ pipeline {
                 echo '🐳 Construction de l\'image Docker...'
                 script {
                     // Utiliser Docker depuis l'hôte via le socket Docker
-                    sh "sudo docker build -f Dockerfile.webapp -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    sh "sudo docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    sh "docker build -f Dockerfile.webapp -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                     
                     // Vérifier que l'image a été créée
-                    sh "sudo docker images | grep ${DOCKER_IMAGE}"
+                    sh "docker images | grep ${DOCKER_IMAGE}"
                 }
             }
         }
