@@ -139,3 +139,4 @@ Dans Jenkins → Manage Jenkins → Configure System :
 ---
 
 *Configuration mise à jour le: $(date)*
+

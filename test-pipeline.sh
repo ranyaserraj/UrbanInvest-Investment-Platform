@@ -123,3 +123,4 @@ echo "- Déployer sur Kubernetes"
 
 echo ""
 print_status "Test du pipeline terminé! 🚀"
+

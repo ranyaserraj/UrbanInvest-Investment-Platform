@@ -107,3 +107,4 @@ Write-Host "• Redémarrer: docker-compose restart [service]" -ForegroundColor 
 
 Write-Host ""
 Write-Success "Environnement de développement démarré! 🚀"
+

@@ -102,21 +102,14 @@
                 <version>3.0.0</version>
             </plugin>
             
-            <!-- Maven Cargo Plugin for Tomcat deployment -->
+            <!-- Maven Tomcat Plugin for deployment -->
             <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.9.15</version>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
                 <configuration>
-                    <container>
-                        <containerId>tomcat9x</containerId>
-                        <type>embedded</type>
-                    </container>
-                    <configuration>
-                        <properties>
-                            <cargo.servlet.port>8080</cargo.servlet.port>
-                        </properties>
-                    </configuration>
+                    <port>8080</port>
+                    <path>/urbaninvest</path>
                 </configuration>
             </plugin>
             

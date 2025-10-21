@@ -94,3 +94,4 @@ volumes:
 networks:
   urbaninvest-network:
     driver: bridge
+

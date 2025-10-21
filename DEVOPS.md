@@ -54,3 +54,4 @@ Nous utilisons la convention **Git Flow** avec les branches suivantes :
 ---
 
 *Documentation mise à jour le: $(date)*
+
