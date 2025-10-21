@@ -2,18 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // Variables d'environnement pour Docker
-        DOCKER_IMAGE = 'urbaninvest/urbaninvest-platform'
-        DOCKER_TAG = "${BUILD_NUMBER}"
-        
         // Variables pour SonarQube
         SONAR_PROJECT_KEY = 'urbaninvest-platform'
         SONAR_PROJECT_NAME = 'UrbanInvest Platform'
         SONAR_HOST_URL = 'http://sonarqube:9000'
-        
-        // Variables pour Kubernetes
-        K8S_NAMESPACE = 'urbaninvest'
-        APP_NAME = 'urbaninvest-app'
     }
 
     stages {
@@ -87,81 +79,28 @@ pipeline {
                 }
             }
         }
-
-        // ========================================
-        // ÉTAPE 5: DOCKER - Containerisation
-        // ========================================
-        stage('5. Docker Build') {
-            steps {
-                echo '🐳 Construction de l\'image Docker...'
-                script {
-                    // Donner les permissions d'exécution et exécuter le script
-                    sh "chmod +x build-docker.sh"
-                    sh "./build-docker.sh ${DOCKER_TAG}"
-                }
-            }
-        }
-
-        // ========================================
-        // ÉTAPE 6: DOCKER COMPOSE - Déploiement
-        // ========================================
-        stage('6. Docker Compose Deployment') {
-            steps {
-                echo '🐳 Déploiement avec Docker Compose...'
-                script {
-                    // Donner les permissions d'exécution et exécuter le script
-                    sh "chmod +x deploy-compose.sh"
-                    sh "./deploy-compose.sh"
-                }
-            }
-        }
-
-        // ========================================
-        // ÉTAPE 7: HEALTH CHECK - Vérification
-        // ========================================
-        stage('7. Health Check') {
-            steps {
-                echo '🏥 Vérification de la santé de l\'application...'
-                script {
-                    // Test de connectivité de l'application
-                    sh "curl -f http://localhost:8082/ || echo 'Application not ready yet'"
-                    
-                    // Vérification des conteneurs
-                    sh "docker ps | grep urbaninvest"
-                }
-            }
-        }
     }
 
     post {
         success {
             echo '✅ Pipeline exécuté avec succès !'
-            echo '🌐 Application déployée et accessible'
-            echo '📊 Monitoring configuré'
+            echo '📦 Package WAR généré'
+            echo '🔍 Analyse SonarQube terminée'
             
             // Notification de succès
             script {
                 echo "🔗 URLs d'accès :"
-                echo "   Application principale: http://localhost:8080"
-                echo "   Application K8s simulé: http://localhost:8082"
-                echo "   Proxy Nginx: http://localhost:3000"
                 echo "   Jenkins: http://localhost:8081"
                 echo "   SonarQube: http://localhost:9000"
+                echo "   Rapport SonarQube: http://sonarqube:9000/dashboard?id=urbaninvest-platform"
             }
         }
         failure {
             echo '❌ Pipeline échoué !'
-            echo '🧹 Nettoyage des ressources...'
-            
-            // Nettoyage en cas d'échec
-            script {
-                sh "docker-compose -f docker-compose.k8s.yml down || true"
-            }
+            echo '🧹 Vérifiez les logs pour plus de détails'
         }
         always {
-            echo '📋 Nettoyage des ressources temporaires...'
-            // Nettoyage des ressources temporaires
-            echo 'Nettoyage terminé'
+            echo '📋 Pipeline terminé'
         }
     }
 }
