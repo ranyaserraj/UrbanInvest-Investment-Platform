@@ -96,11 +96,11 @@ pipeline {
                 echo '🐳 Construction de l\'image Docker...'
                 script {
                     // Utiliser Docker depuis l'hôte via le socket Docker
-                    sh "docker build -f Dockerfile.webapp -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    sh "sudo docker build -f Dockerfile.webapp -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    sh "sudo docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                     
                     // Vérifier que l'image a été créée
-                    sh "docker images | grep ${DOCKER_IMAGE}"
+                    sh "sudo docker images | grep ${DOCKER_IMAGE}"
                 }
             }
         }
@@ -112,10 +112,8 @@ pipeline {
             steps {
                 echo '🐳 Déploiement avec Docker Compose...'
                 script {
-                    // Arrêter les conteneurs existants
+                    // Utiliser Docker Compose depuis l'hôte
                     sh "docker-compose -f docker-compose.k8s.yml down || true"
-                    
-                    // Démarrer les nouveaux conteneurs
                     sh "docker-compose -f docker-compose.k8s.yml up -d"
                     
                     // Attendre que les services soient prêts
