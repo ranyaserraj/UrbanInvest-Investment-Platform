@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: urbaninvest
+  labels:
+    name: urbaninvest
+    app: urbaninvest-platform

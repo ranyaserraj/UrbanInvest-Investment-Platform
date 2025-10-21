@@ -1,0 +1,22 @@
+# Dockerfile simplifié pour UrbanInvest Platform - Version WebApp
+FROM tomcat:9.0-jdk8-openjdk-slim
+
+# Supprimer les applications par défaut de Tomcat
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Copier les fichiers de l'application web directement
+COPY src/main/webapp/ /usr/local/tomcat/webapps/ROOT/
+
+# Créer un utilisateur non-root pour la sécurité
+RUN groupadd -r tomcat && useradd -r -g tomcat tomcat
+RUN chown -R tomcat:tomcat /usr/local/tomcat
+USER tomcat
+
+# Exposer le port 8080
+EXPOSE 8080
+
+# Variables d'environnement
+ENV CATALINA_OPTS="-Xmx512m -Xms256m"
+
+# Commande de démarrage
+CMD ["catalina.sh", "run"]

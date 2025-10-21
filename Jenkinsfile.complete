@@ -5,6 +5,7 @@ pipeline {
         // Variables d'environnement pour Docker
         DOCKER_IMAGE = 'urbaninvest/urbaninvest-platform'
         DOCKER_TAG = "${BUILD_NUMBER}"
+        DOCKER_REGISTRY = 'docker.io'
         
         // Variables pour SonarQube
         SONAR_PROJECT_KEY = 'urbaninvest-platform'
@@ -50,9 +51,33 @@ pipeline {
         }
 
         // ========================================
-        // ÉTAPE 3: PACKAGE - Générer le WAR
+        // ÉTAPE 3: TEST - Tests unitaires
         // ========================================
-        stage('3. Package') {
+        stage('3. Test') {
+            steps {
+                echo '🧪 Exécution des tests unitaires...'
+                script {
+                    if (fileExists('mvnw')) {
+                        sh './mvnw test'
+                    } else {
+                        sh 'mvn test'
+                    }
+                }
+            }
+            post {
+                always {
+                    // Publication des rapports de tests
+                    junit 'target/surefire-reports/**/*.xml'
+                    // Rapport de couverture JaCoCo
+                    jacoco(execPattern: 'target/jacoco.exec', classPattern: '**/classes', sourcePattern: '**/src/main/java')
+                }
+            }
+        }
+
+        // ========================================
+        // ÉTAPE 4: PACKAGE - Générer le WAR
+        // ========================================
+        stage('4. Package') {
             steps {
                 echo '📦 Génération du package WAR...'
                 script {
@@ -65,15 +90,16 @@ pipeline {
             }
             post {
                 always {
+                    // Archivage des artefacts
                     archiveArtifacts artifacts: 'target/*.war', fingerprint: true
                 }
             }
         }
 
         // ========================================
-        // ÉTAPE 4: SONARQUBE - Analyse qualité
+        // ÉTAPE 5: SONARQUBE - Analyse qualité
         // ========================================
-        stage('4. SonarQube Analysis') {
+        stage('5. SonarQube Analysis') {
             steps {
                 echo '🔍 Analyse de la qualité du code avec SonarQube...'
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
@@ -89,22 +115,30 @@ pipeline {
         }
 
         // ========================================
-        // ÉTAPE 5: DOCKER - Containerisation
+        // ÉTAPE 6: DOCKER - Containerisation
         // ========================================
-        stage('5. Docker Build') {
+        stage('6. Docker Build & Push') {
             steps {
-                echo '🐳 Construction de l\'image Docker...'
+                echo '🐳 Construction et publication de l\'image Docker...'
                 script {
+                    // Construction de l'image
                     sh "docker build -f Dockerfile.webapp -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                     sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    
+                    // Publication sur Docker Hub (optionnel)
+                    // withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    //     sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                    //     sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    //     sh "docker push ${DOCKER_IMAGE}:latest"
+                    // }
                 }
             }
         }
 
         // ========================================
-        // ÉTAPE 6: KUBERNETES - Déploiement
+        // ÉTAPE 7: KUBERNETES - Déploiement
         // ========================================
-        stage('6. Kubernetes Deployment') {
+        stage('7. Kubernetes Deployment') {
             steps {
                 echo '☸️ Déploiement sur Kubernetes...'
                 script {
@@ -121,9 +155,9 @@ pipeline {
         }
 
         // ========================================
-        // ÉTAPE 7: MONITORING - Prometheus & Grafana
+        // ÉTAPE 8: MONITORING - Prometheus & Grafana
         // ========================================
-        stage('7. Monitoring Setup') {
+        stage('8. Monitoring Setup') {
             steps {
                 echo '📊 Configuration du monitoring avec Prometheus & Grafana...'
                 script {
@@ -141,9 +175,9 @@ pipeline {
         }
 
         // ========================================
-        // ÉTAPE 8: HEALTH CHECK - Vérification
+        // ÉTAPE 9: HEALTH CHECK - Vérification
         // ========================================
-        stage('8. Health Check') {
+        stage('9. Health Check') {
             steps {
                 echo '🏥 Vérification de la santé de l\'application...'
                 script {
@@ -152,6 +186,11 @@ pipeline {
                     
                     // Vérification des services
                     sh "kubectl get services -n ${K8S_NAMESPACE}"
+                    
+                    // Test de connectivité
+                    sh "kubectl port-forward service/${APP_NAME} 8080:8080 -n ${K8S_NAMESPACE} &"
+                    sleep(10)
+                    sh "curl -f http://localhost:8080/ || exit 1"
                 }
             }
         }
@@ -165,10 +204,14 @@ pipeline {
             
             // Notification de succès
             script {
+                def deploymentUrl = "http://localhost:8080"
+                def grafanaUrl = "http://localhost:3000"
+                def prometheusUrl = "http://localhost:9090"
+                
                 echo "🔗 URLs d'accès :"
-                echo "   Application: http://localhost:8080"
-                echo "   Grafana: http://localhost:3000"
-                echo "   Prometheus: http://localhost:9090"
+                echo "   Application: ${deploymentUrl}"
+                echo "   Grafana: ${grafanaUrl}"
+                echo "   Prometheus: ${prometheusUrl}"
             }
         }
         failure {

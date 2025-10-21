@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: mysql-deployment
+  namespace: urbaninvest
   labels:
     app: mysql
 spec:
@@ -28,17 +29,30 @@ spec:
           value: "urbaninvest"
         - name: MYSQL_PASSWORD
           value: "urbaninvest123"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
         volumeMounts:
         - name: mysql-storage
           mountPath: /var/lib/mysql
+        - name: mysql-init
+          mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: mysql-storage
         persistentVolumeClaim:
           claimName: mysql-pvc
+      - name: mysql-init
+        configMap:
+          name: mysql-init-script
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: urbaninvest
+  labels:
+    app: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP
