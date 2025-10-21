@@ -1,5 +1,6 @@
 package com.urbaninvest;
 
+import projet_s3.EtudeMarche;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,3 +55,4 @@ public class EtudeMarcheTest {
         assertFalse(isValid, "L'étude de marché ne devrait pas être valide");
     }
 }
+

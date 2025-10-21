@@ -1,5 +1,6 @@
 package com.urbaninvest;
 
+import projet_s3.Login;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,3 +60,4 @@ public class LoginTest {
         assertFalse(result, "L'authentification devrait échouer avec des identifiants null");
     }
 }
+
