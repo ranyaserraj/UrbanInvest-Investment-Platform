@@ -42,6 +42,27 @@ pipeline {
         }
 
         // ========================================
+        // ÉTAPE 2.5: TEST - Exécuter les tests unitaires
+        // ========================================
+        stage('2.5. Test') {
+            steps {
+                echo '🧪 Exécution des tests unitaires...'
+                script {
+                    if (fileExists('mvnw')) {
+                        sh './mvnw test'
+                    } else {
+                        sh 'mvn test'
+                    }
+                }
+            }
+            post {
+                always {
+                    publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        // ========================================
         // ÉTAPE 3: PACKAGE - Générer le WAR
         // ========================================
         stage('3. Package') {

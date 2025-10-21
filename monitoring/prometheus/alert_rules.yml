@@ -1,0 +1,38 @@
+groups:
+  - name: urbaninvest-alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{name="urbaninvest-app-k8s"}[5m]) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 2 minutes"
+
+      - alert: HighMemoryUsage
+        expr: container_memory_usage_bytes{name="urbaninvest-app-k8s"} / container_spec_memory_limit_bytes{name="urbaninvest-app-k8s"} * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 2 minutes"
+
+      - alert: ServiceDown
+        expr: up{job="urbaninvest-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "UrbanInvest service is down"
+          description: "The UrbanInvest application is not responding"
+
+      - alert: SlowResponseTime
+        expr: http_request_duration_seconds{job="urbaninvest-app"} > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow response time detected"
+          description: "Response time is above 5 seconds"

@@ -1,0 +1,71 @@
+version: '3.8'
+
+# Simulation d'un environnement Kubernetes avec Docker Compose
+# Ce fichier simule les composants Kubernetes pour le déploiement UrbanInvest
+
+services:
+  # Base de données MySQL (simulation d'un StatefulSet)
+  mysql-k8s:
+    image: mysql:8.0
+    container_name: urbaninvest-mysql-k8s
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: urbaninvest
+      MYSQL_USER: urbaninvest
+      MYSQL_PASSWORD: urbaninvest123
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_k8s_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    networks:
+      - urbaninvest-k8s-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Application UrbanInvest (simulation d'un Deployment)
+  urbaninvest-app-k8s:
+    image: urbaninvest/urbaninvest-platform:latest
+    container_name: urbaninvest-app-k8s
+    ports:
+      - "8085:8080"
+    environment:
+      - DB_HOST=mysql-k8s
+      - DB_PORT=3306
+      - DB_NAME=urbaninvest
+      - DB_USER=urbaninvest
+      - DB_PASSWORD=urbaninvest123
+    networks:
+      - urbaninvest-k8s-network
+    depends_on:
+      - mysql-k8s
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Service de monitoring (simulation d'un Service)
+  monitoring:
+    image: nginx:alpine
+    container_name: urbaninvest-monitoring
+    ports:
+      - "3001:80"
+    volumes:
+      - ./monitoring/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - urbaninvest-k8s-network
+    depends_on:
+      - urbaninvest-app-k8s
+    restart: unless-stopped
+
+volumes:
+  mysql_k8s_data:
+
+networks:
+  urbaninvest-k8s-network:
+    driver: bridge
