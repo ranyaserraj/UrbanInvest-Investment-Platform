@@ -57,7 +57,8 @@ pipeline {
             }
             post {
                 always {
-                    publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                    echo '📊 Tests unitaires terminés'
+                    echo '📁 Rapports de tests disponibles dans target/surefire-reports/'
                 }
             }
         }
