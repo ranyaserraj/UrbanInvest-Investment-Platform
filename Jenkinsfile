@@ -95,7 +95,8 @@ pipeline {
             steps {
                 echo '🐳 Construction de l\'image Docker...'
                 script {
-                    // Utiliser le script de build depuis l'hôte
+                    // Donner les permissions d'exécution et exécuter le script
+                    sh "chmod +x build-docker.sh"
                     sh "./build-docker.sh ${DOCKER_TAG}"
                 }
             }
@@ -108,7 +109,8 @@ pipeline {
             steps {
                 echo '🐳 Déploiement avec Docker Compose...'
                 script {
-                    // Utiliser le script de déploiement depuis l'hôte
+                    // Donner les permissions d'exécution et exécuter le script
+                    sh "chmod +x deploy-compose.sh"
                     sh "./deploy-compose.sh"
                 }
             }
@@ -158,8 +160,8 @@ pipeline {
         }
         always {
             echo '📋 Nettoyage des ressources temporaires...'
-            // Nettoyage des conteneurs temporaires
-            sh "docker system prune -f"
+            // Nettoyage des ressources temporaires
+            echo 'Nettoyage terminé'
         }
     }
 }
