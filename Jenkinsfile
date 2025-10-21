@@ -95,12 +95,8 @@ pipeline {
             steps {
                 echo '🐳 Construction de l\'image Docker...'
                 script {
-                    // Utiliser Docker depuis l'hôte via le socket Docker
-                    sh "docker build -f Dockerfile.webapp -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
-                    
-                    // Vérifier que l'image a été créée
-                    sh "docker images | grep ${DOCKER_IMAGE}"
+                    // Utiliser le script de build depuis l'hôte
+                    sh "./build-docker.sh ${DOCKER_TAG}"
                 }
             }
         }
@@ -112,15 +108,8 @@ pipeline {
             steps {
                 echo '🐳 Déploiement avec Docker Compose...'
                 script {
-                    // Utiliser Docker Compose depuis l'hôte
-                    sh "docker-compose -f docker-compose.k8s.yml down || true"
-                    sh "docker-compose -f docker-compose.k8s.yml up -d"
-                    
-                    // Attendre que les services soient prêts
-                    sh "sleep 30"
-                    
-                    // Vérifier l'état des conteneurs
-                    sh "docker-compose -f docker-compose.k8s.yml ps"
+                    // Utiliser le script de déploiement depuis l'hôte
+                    sh "./deploy-compose.sh"
                 }
             }
         }
