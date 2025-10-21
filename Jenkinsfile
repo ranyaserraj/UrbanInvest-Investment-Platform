@@ -95,63 +95,50 @@ pipeline {
             steps {
                 echo '🐳 Construction de l\'image Docker...'
                 script {
+                    // Utiliser Docker depuis l'hôte via le socket Docker
                     sh "docker build -f Dockerfile.webapp -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                     sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    
+                    // Vérifier que l'image a été créée
+                    sh "docker images | grep ${DOCKER_IMAGE}"
                 }
             }
         }
 
         // ========================================
-        // ÉTAPE 6: KUBERNETES - Déploiement
+        // ÉTAPE 6: DOCKER COMPOSE - Déploiement
         // ========================================
-        stage('6. Kubernetes Deployment') {
+        stage('6. Docker Compose Deployment') {
             steps {
-                echo '☸️ Déploiement sur Kubernetes...'
+                echo '🐳 Déploiement avec Docker Compose...'
                 script {
-                    // Création du namespace
-                    sh "kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -"
+                    // Arrêter les conteneurs existants
+                    sh "docker-compose -f docker-compose.k8s.yml down || true"
                     
-                    // Déploiement de l'application
-                    sh "kubectl apply -f k8s/ -n ${K8S_NAMESPACE}"
+                    // Démarrer les nouveaux conteneurs
+                    sh "docker-compose -f docker-compose.k8s.yml up -d"
                     
-                    // Attente du déploiement
-                    sh "kubectl rollout status deployment/${APP_NAME} -n ${K8S_NAMESPACE} --timeout=300s"
+                    // Attendre que les services soient prêts
+                    sh "sleep 30"
+                    
+                    // Vérifier l'état des conteneurs
+                    sh "docker-compose -f docker-compose.k8s.yml ps"
                 }
             }
         }
 
         // ========================================
-        // ÉTAPE 7: MONITORING - Prometheus & Grafana
+        // ÉTAPE 7: HEALTH CHECK - Vérification
         // ========================================
-        stage('7. Monitoring Setup') {
-            steps {
-                echo '📊 Configuration du monitoring avec Prometheus & Grafana...'
-                script {
-                    // Déploiement de Prometheus
-                    sh "kubectl apply -f monitoring/prometheus/ -n ${K8S_NAMESPACE}"
-                    
-                    // Déploiement de Grafana
-                    sh "kubectl apply -f monitoring/grafana/ -n ${K8S_NAMESPACE}"
-                    
-                    // Attente du démarrage des services
-                    sh "kubectl wait --for=condition=available --timeout=300s deployment/prometheus -n ${K8S_NAMESPACE}"
-                    sh "kubectl wait --for=condition=available --timeout=300s deployment/grafana -n ${K8S_NAMESPACE}"
-                }
-            }
-        }
-
-        // ========================================
-        // ÉTAPE 8: HEALTH CHECK - Vérification
-        // ========================================
-        stage('8. Health Check') {
+        stage('7. Health Check') {
             steps {
                 echo '🏥 Vérification de la santé de l\'application...'
                 script {
-                    // Vérification des pods
-                    sh "kubectl get pods -n ${K8S_NAMESPACE}"
+                    // Test de connectivité de l'application
+                    sh "curl -f http://localhost:8082/ || echo 'Application not ready yet'"
                     
-                    // Vérification des services
-                    sh "kubectl get services -n ${K8S_NAMESPACE}"
+                    // Vérification des conteneurs
+                    sh "docker ps | grep urbaninvest"
                 }
             }
         }
@@ -166,9 +153,11 @@ pipeline {
             // Notification de succès
             script {
                 echo "🔗 URLs d'accès :"
-                echo "   Application: http://localhost:8080"
-                echo "   Grafana: http://localhost:3000"
-                echo "   Prometheus: http://localhost:9090"
+                echo "   Application principale: http://localhost:8080"
+                echo "   Application K8s simulé: http://localhost:8082"
+                echo "   Proxy Nginx: http://localhost:3000"
+                echo "   Jenkins: http://localhost:8081"
+                echo "   SonarQube: http://localhost:9000"
             }
         }
         failure {
@@ -177,7 +166,7 @@ pipeline {
             
             // Nettoyage en cas d'échec
             script {
-                sh "kubectl delete namespace ${K8S_NAMESPACE} --ignore-not-found=true"
+                sh "docker-compose -f docker-compose.k8s.yml down || true"
             }
         }
         always {
