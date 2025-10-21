@@ -120,11 +120,12 @@
                 <version>3.9.1.2184</version>
             </plugin>
             
-            <!-- JaCoCo Maven Plugin for code coverage -->
+            <!-- JaCoCo Maven Plugin for code coverage - DISABLED due to Java 21 compatibility -->
+            <!--
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <goals>
@@ -140,6 +141,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
     </build>
 </project>
