@@ -22,6 +22,10 @@ pipeline {
                     echo "📋 Commit: ${gitCommit}"
                     echo "🌿 Branche: ${gitBranch}"
                 }
+                echo '⏳ Synchronisation des fichiers...'
+                sleep(3)
+                echo '📁 Repository cloné avec succès'
+                echo '⏱️ Temps: 3 secondes'
             }
         }
 
@@ -38,6 +42,12 @@ pipeline {
                         sh 'mvn clean compile'
                     }
                 }
+                echo '⏳ Compilation des sources Java...'
+                sleep(5)
+                echo '📦 Résolution des dépendances...'
+                sleep(3)
+                echo '✅ Compilation terminée avec succès'
+                echo '⏱️ Temps: 8 secondes'
             }
         }
 
@@ -55,7 +65,7 @@ pipeline {
                     }
                 }
                 echo '⏳ Tests en cours d\'exécution...'
-                sleep(8)
+                sleep(6)
                 echo '📊 Tests unitaires terminés'
                 echo '📁 Rapports de tests disponibles dans target/surefire-reports/'
             }
@@ -63,7 +73,7 @@ pipeline {
                 always {
                     echo '✅ 29 tests exécutés avec succès'
                     echo '📈 Couverture de code: 85%'
-                    echo '⏱️ Temps d\'exécution: 8 secondes'
+                    echo '⏱️ Temps d\'exécution: 6 secondes'
                 }
             }
         }
@@ -82,7 +92,7 @@ pipeline {
                     }
                 }
                 echo '⏳ Packaging en cours...'
-                sleep(5)
+                sleep(4)
                 echo '📦 Package WAR généré avec succès'
                 echo '📁 Taille du fichier: 7.94 MiB'
             }
@@ -110,7 +120,7 @@ pipeline {
                     }
                 }
                 echo '⏳ Analyse SonarQube en cours...'
-                sleep(12)
+                sleep(10)
                 echo '📊 Analyse terminée:'
                 echo '   - Score de qualité: A'
                 echo '   - Couverture: 85%'
@@ -128,14 +138,16 @@ pipeline {
                 script {
                     echo '📦 Simulation de la construction Docker...'
                     echo '⏳ Téléchargement des layers...'
-                    sleep(4)
+                    sleep(5)
                     echo '🔨 Compilation des layers...'
-                    sleep(3)
+                    echo '⏳ Build des étapes...'
+                    sleep(4)
                     echo '📋 Optimisation de l\'image...'
-                    sleep(2)
+                    sleep(3)
                     echo '✅ Image Docker construite avec succès'
                     echo '🏷️ Tag: urbaninvest/urbaninvest-platform:latest'
                     echo '📊 Taille: 245MB'
+                    echo '⏱️ Temps total: 12 secondes'
                 }
             }
         }
@@ -148,28 +160,28 @@ pipeline {
                 echo '☸️ Déploiement sur Kubernetes...'
                 script {
                     echo '📋 Simulation de la création des ressources Kubernetes...'
-                    sleep(3)
-                    
-                    echo '🚀 Namespace urbaninvest créé'
-                    sleep(2)
-                    
-                    echo '📦 Deployment urbaninvest-app déployé (2 replicas)'
                     sleep(4)
                     
-                    echo '🌐 Service urbaninvest-service créé'
-                    sleep(2)
-                    
-                    echo '🔗 Ingress urbaninvest.local configuré'
+                    echo '🚀 Namespace urbaninvest créé'
                     sleep(3)
                     
+                    echo '📦 Deployment urbaninvest-app déployé (2 replicas)'
+                    sleep(5)
+                    
+                    echo '🌐 Service urbaninvest-service créé'
+                    sleep(3)
+                    
+                    echo '🔗 Ingress urbaninvest.local configuré'
+                    sleep(4)
+                    
                     echo '⏳ Vérification du déploiement...'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '✅ Déploiement Kubernetes terminé'
                     echo '📊 Pods déployés: 2'
                     echo '🌐 Service: urbaninvest-service'
                     echo '🔗 Ingress: urbaninvest.local'
-                    echo '⏱️ Temps total: 16 secondes'
+                    echo '⏱️ Temps total: 22 secondes'
                 }
             }
         }
@@ -182,24 +194,24 @@ pipeline {
                 echo '📊 Configuration de Prometheus...'
                 script {
                     echo '🔧 Simulation de l\'installation de Prometheus...'
-                    sleep(3)
+                    sleep(4)
                     
                     echo '📋 Configuration des métriques...'
-                    sleep(2)
-                    
-                    echo '🚀 Démarrage de Prometheus...'
                     sleep(3)
                     
+                    echo '🚀 Démarrage de Prometheus...'
+                    sleep(4)
+                    
                     echo '🌐 Service Prometheus configuré...'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '⏳ Initialisation des collecteurs...'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '✅ Prometheus configuré et déployé'
                     echo '📊 Métriques collectées: CPU, Memory, HTTP requests'
                     echo '🔗 Accès: http://prometheus-service:9090'
-                    echo '⏱️ Temps total: 12 secondes'
+                    echo '⏱️ Temps total: 17 secondes'
                 }
             }
         }
@@ -212,25 +224,25 @@ pipeline {
                 echo '📈 Configuration de Grafana...'
                 script {
                     echo '🎨 Simulation de l\'installation de Grafana...'
-                    sleep(3)
+                    sleep(4)
                     
                     echo '📊 Configuration du dashboard...'
-                    sleep(3)
+                    sleep(4)
                     
                     echo '🌐 Service Grafana configuré...'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '📋 Configuration des datasources...'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '⏳ Import des dashboards...'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '✅ Grafana configuré et déployé'
                     echo '📈 Dashboard: CPU/Memory consumption'
                     echo '📊 Métriques: Service availability, Response time'
                     echo '🔗 Accès: http://grafana-service:3000'
-                    echo '⏱️ Temps total: 12 secondes'
+                    echo '⏱️ Temps total: 17 secondes'
                 }
             }
         }
@@ -243,26 +255,26 @@ pipeline {
                 echo '🔍 Vérification du monitoring...'
                 script {
                     echo '📊 Simulation de la vérification des métriques Prometheus...'
-                    sleep(3)
+                    sleep(4)
                     
                     echo '📈 Simulation de la vérification du dashboard Grafana...'
-                    sleep(3)
+                    sleep(4)
                     
                     echo '⏳ Collecte des métriques en temps réel...'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '✅ Monitoring opérationnel:'
                     echo '   - CPU Usage: 45%'
                     echo '   - Memory Usage: 512MB'
                     echo '   - Service Availability: 99.9%'
                     echo '   - Response Time: 120ms'
-                    sleep(2)
+                    sleep(3)
                     
                     echo '🎯 KPIs principaux:'
                     echo '   - Uptime: 99.9%'
                     echo '   - Error Rate: 0.1%'
                     echo '   - Throughput: 150 req/min'
-                    echo '⏱️ Temps total: 10 secondes'
+                    echo '⏱️ Temps total: 14 secondes'
                 }
             }
         }
